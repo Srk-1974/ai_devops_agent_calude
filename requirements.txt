@@ -1,0 +1,10 @@
+fastapi
+uvicorn
+pytest
+pytest-asyncio
+pydantic
+pydantic-settings
+azure-devops
+azure-cosmos
+openai
+python-dotenv

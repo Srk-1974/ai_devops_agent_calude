@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Azure AI PR Analyzer Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-hover: #4f46e5;
+            --bg: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --border: rgba(255, 255, 255, 0.1);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --radius: 16px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+
+        body {
+            background-color: var(--bg);
+            background-image: radial-gradient(at top left, rgba(99, 102, 241, 0.15), transparent 50%),
+                              radial-gradient(at bottom right, rgba(16, 185, 129, 0.1), transparent 50%);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            padding: 1.5rem 3rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+            backdrop-filter: blur(12px);
+            background: rgba(15, 23, 42, 0.6);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            font-size: 1.25rem;
+            font-weight: 700;
+        }
+
+        .logo-icon {
+            width: 36px; height: 36px;
+            background: linear-gradient(135deg, var(--primary), #8b5cf6);
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 0 15px rgba(99, 102, 241, 0.4);
+        }
+
+        .status {
+            display: flex; align-items: center; gap: 0.5rem;
+            background: rgba(16, 185, 129, 0.15);
+            padding: 0.5rem 1rem;
+            border-radius: 99px;
+            font-size: 0.875rem; font-weight: 500;
+            color: var(--success);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+
+        .pulse {
+            width: 8px; height: 8px;
+            background: var(--success);
+            border-radius: 50%;
+            box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+            animation: pulse-ring 2s infinite;
+        }
+
+        @keyframes pulse-ring {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+        }
+
+        main {
+            flex: 1;
+            padding: 4rem 3rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .hero {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: linear-gradient(to right, #fff, #cbd5e1);
+            -webkit-background-clip: text; color: transparent;
+            letter-spacing: -1px;
+        }
+
+        .hero p {
+            color: var(--text-muted);
+            font-size: 1.125rem;
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 2rem;
+            backdrop-filter: blur(10px);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+            border-color: rgba(255,255,255,0.2);
+        }
+
+        .card h3 {
+            font-size: 1.125rem;
+            color: var(--text-muted);
+            margin-bottom: 1.5rem;
+            font-weight: 500;
+        }
+
+        .stat-value {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        
+        .terminal {
+            background: rgba(0,0,0,0.4);
+            border-radius: 12px;
+            padding: 1.5rem;
+            font-family: monospace;
+            color: #cbd5e1;
+            font-size: 0.9rem;
+            height: 200px;
+            overflow-y: auto;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .log-entry { margin-bottom: 0.75rem; border-left: 2px solid var(--primary); padding-left: 10px; }
+        .log-time { color: var(--text-muted); font-size: 0.8rem; margin-right: 0.5rem;}
+        .log-success { color: var(--success); }
+
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">
+            <div class="logo-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+            </div>
+            AI PR Analyzer
+        </div>
+        <div class="status">
+            <div class="pulse"></div> Services Online
+        </div>
+    </header>
+
+    <main>
+        <div class="hero">
+            <h1>Automate Your Code Reviews</h1>
+            <p>Your AI-powered agent is actively listening for Azure DevOps Pull Request webhooks to provide instant, contextual code analysis.</p>
+        </div>
+
+        <div class="grid">
+            <div class="card">
+                <h3>System Status</h3>
+                <div class="stat-value" style="color: var(--success);">Online</div>
+                <p style="color: var(--text-muted);">Listening on <code style="color: var(--primary);">/webhook/pr</code></p>
+                <div style="margin-top: 2rem;">
+                    <a href="/docs" style="display: inline-block; padding: 0.75rem 1.5rem; background: var(--primary); color: white; text-decoration: none; border-radius: 8px; font-weight: 500; transition: background 0.2s;">View API Docs</a>
+                </div>
+            </div>
+
+            <div class="card" style="grid-column: span 2;">
+                <h3>Live Agent Activity</h3>
+                <div class="terminal" id="terminal">
+                    <div class="log-entry">
+                        <span class="log-time">[Just now]</span>
+                        <span class="log-success">SYSTEM</span> Application started successfully.
+                    </div>
+                     <div class="log-entry">
+                        <span class="log-time">[Just now]</span>
+                        <span style="color: #60a5fa;">NETWORK</span> Waiting for incoming webhook events...
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Simple polling to keep the UI feeling "alive"
+        const terminal = document.getElementById('terminal');
+        
+        async function fetchStatus() {
+            try {
+                const res = await fetch('/api/status');
+                const data = await res.json();
+                
+                if (data.activity && data.activity.length > 0) {
+                    terminal.innerHTML = '';
+                    data.activity.forEach(act => {
+                        terminal.innerHTML += `
+                            <div class="log-entry">
+                                <span class="log-time">[${act.time}]</span>
+                                <span class="log-success">${act.type}</span> ${act.message}
+                            </div>
+                        `;
+                    });
+                    terminal.scrollTop = terminal.scrollHeight;
+                }
+            } catch (e) {
+                // Ignore fetch errors if server isn't returning custom activity yet
+            }
+        }
+        
+        setInterval(fetchStatus, 3000);
+    </script>
+</body>
+</html>
