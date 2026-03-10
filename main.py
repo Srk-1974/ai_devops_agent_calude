@@ -23,7 +23,7 @@ async def get_status():
     return {
         "status": "online",
         "activity": [
-            {"time": "Just now", "type": "SYSTEM", "message": "Listening for Azure webhooks..."},
+            {"timestamp": "Just now", "type": "SYSTEM", "message": "Listening for Azure webhooks...", "status": "success"},
         ]
     }
 
