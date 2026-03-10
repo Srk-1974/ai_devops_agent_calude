@@ -8,3 +8,6 @@ azure-devops
 azure-cosmos
 openai
 python-dotenv
+streamlit
+pandas
+requests
